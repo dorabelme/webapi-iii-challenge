@@ -5,10 +5,11 @@ const userDb = require('../users/userDb.js');
 
 const router = express.Router();
 
+// POST a user
 router.post('/', validateUserId, validatePost, (req, res) => {
     const user = req.body;
-
-    userDb.insert(user)
+    if (user.name && user.name !== "") {
+        userDb.insert(user)
         .then(user => {
             res.status(201).json(user);
         })
@@ -16,8 +17,13 @@ router.post('/', validateUserId, validatePost, (req, res) => {
             console.log(err);
             res.status(500).json({ error: "There was an error while saving user to database." });
         });
+    } else {
+        res.status(400).json({ error: "Please provide name for user." });
+    }
 });
 
+
+// POST
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
     const post = req.body;
 
@@ -31,6 +37,7 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
         });
 });
 
+// GET users
 router.get('/', (req, res) => {
     userDb.get()
         .then(users => {
@@ -43,14 +50,45 @@ router.get('/', (req, res) => {
 
 });
 
+// GET user by id
 router.get('/:id', validateUserId, (req, res) => {
-    
+    const { id } = req.params;
+    userDb.getById(id)
+        .then(user => {
+            console.log(user);
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                res.status(404).json({ error: "The user with the specified ID does not exist." });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(404).json({ error: "There was an error retrieving the user from the database." });
+        });
 });
 
+// GET user by id posts
 router.get('/:id/posts', validateUserId, (req, res) => {
-
+    const { id } = req.params;
+    userDb.getById(id)
+        .then(user => {
+            console.log(user);
+            if (user) {
+                userDb.getUserPosts(id)
+                    .then(posts => res.status(200).json(posts))
+                    .catch(err => res.status(500).json({ error: "There was an error retrieving the user's posts." }))
+            } else {
+                res.status(404).json({ error: "The user with the specified ID does not exist." });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(404).json({ error: "There was an error retrieving the user from the database." });
+        });
 });
 
+// DELETE user by id
 router.delete('/:id', validateUserId, (req, res) => {
     const { id } = req.params;
     userDb.remove(id)
@@ -64,21 +102,25 @@ router.delete('/:id', validateUserId, (req, res) => {
 
 });
 
+// PUT user by id
 router.put('/:id', validateUserId, (req, res) => {
     const { id } = req.params;
     const editedUser = req.body;
 
-    userDb.update(id, editedUser)
-        .then(edited => {
-            res.status(200).json(editedUser);
-        })
-        .catch(err => {
-            res.status(500).json({ error: "User could not be updated." })
-        });
+    if (editedUser.name && editedUser.name !== "") {
+        userDb.update(id, editedUser)
+            .then(edited => {
+                res.status(200).json(editedUser);
+            })
+            .catch(err => {
+                res.status(500).json({ error: "User could not be updated." })
+            });
+    }
 });
 
-//custom middleware
 
+
+//custom middleware
 function validateUserId(req, res, next) {
     const { id } = req.params;
 
