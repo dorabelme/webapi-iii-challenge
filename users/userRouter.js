@@ -6,7 +6,7 @@ const userDb = require('../users/userDb.js');
 const router = express.Router();
 
 // POST a user
-router.post('/', validateUserId, validatePost, (req, res) => {
+router.post('/', validateUser, (req, res) => {
     const user = req.body;
     if (user.name && user.name !== "") {
         userDb.insert(user)
@@ -128,7 +128,7 @@ function validateUserId(req, res, next) {
         .then(user => {
             console.log(user);
             if (!user) {
-                res.status(404).json({ error: "Invalid user ID." })
+                res.status(404).json({ error: "Invalid user id." })
             } else {
                 req.user = user;
                 next();
@@ -142,9 +142,9 @@ function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
     if (!req.body) {
-        res.status(400).json({ error: "User data is missing." });
+        res.status(400).json({ error: "Missing user data." });
     } else if (!req.body.name) {
-        res.status(400).json({ error: "Required name field is missing." });
+        res.status(400).json({ error: "Missing required name field." });
     } else {
         next();
     }
@@ -152,11 +152,11 @@ function validateUser(req, res, next) {
 
 function validatePost(req, res, next) {
     if (!req.body) {
-        res.status(400).json({ error: "Post data is missing." });
+        res.status(400).json({ error: "Missing post data." });
     } else if (!req.body.text) {
-        res.status(400).json({ error: "Required text field is missing." });
+        res.status(400).json({ error: "Missing required text field." });
     } else if (!req.body.user_id) {
-        res.status(400).json({ error: "Required user ID field is missing." });
+        res.status(400).json({ error: "Missing required user ID." });
     } else {
         next();
     }
