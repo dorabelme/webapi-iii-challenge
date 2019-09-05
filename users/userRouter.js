@@ -110,9 +110,22 @@ router.put('/:id', validateUserId, (req, res) => {
 
     userDb.update(id, { name })
         .then(updated => {
-            res.status(200).json(updated);
+            if (updated) {
+                userDb.getById(id)
+                    .then(user => {
+                        res.status(200).json(user)
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).json({ error: "User could not be retrieved" });
+                    })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: "There was an error while updating the user." });
         });
-
+    
     // userDb.getById(id)
     //     .then(user => {
     //         if (user) {
