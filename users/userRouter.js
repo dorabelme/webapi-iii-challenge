@@ -195,8 +195,8 @@ function validatePost(req, res, next) {
         res.status(400).json({ error: "Missing post data." });
     } else if (!req.body.text) {
         res.status(400).json({ error: "Missing required text field." });
-    } else if (!req.body.user_id) {
-        res.status(400).json({ error: "Missing required user ID." });
+    // } else if (!req.body.user_id) {
+    //     res.status(400).json({ error: "Missing required user ID." });
     } else {
         next();
     }
