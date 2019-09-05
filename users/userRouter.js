@@ -8,8 +8,9 @@ const router = express.Router();
 // POST a user
 router.post('/', validateUser, (req, res) => {
     const user = req.body;
+    const { name } = req.body;
     if (user.name && user.name !== "") {
-        userDb.insert(user)
+        userDb.insert({name})
         .then(user => {
             res.status(201).json(user);
         })
@@ -79,9 +80,10 @@ router.get('/:id/posts', validateUserId, (req, res) => {
                 userDb.getUserPosts(id)
                     .then(posts => res.status(200).json(posts))
                     .catch(err => res.status(500).json({ error: "There was an error retrieving the user's posts." }))
-            } else {
-                res.status(404).json({ error: "The user with the specified ID does not exist." });
             }
+            // else {
+            //     res.status(404).json({ error: "The user with the specified ID does not exist." });
+            // }
         })
         .catch(err => {
             console.log(err);
@@ -179,6 +181,8 @@ function validateUser(req, res, next) {
         res.status(400).json({ error: "Missing user data." });
     } else if (!req.body.name) {
         res.status(400).json({ error: "Missing required name field." });
+    } else if (typeof req.body.name !== "string") {
+        res.status(400).json({ error: "Name must be a string." });
     } else {
         next();
     }
