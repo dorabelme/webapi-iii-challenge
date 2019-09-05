@@ -1,6 +1,6 @@
-const express = 'express';
+const express = require('express');
 
-const postDb = require('./postDb.js');
+const postDb = require('../posts/postDb.js');
 const userDb = require('../users/userDb.js');
 
 const router = express.Router();
@@ -27,7 +27,7 @@ router.post('/', validateUser, (req, res) => {
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
     const post = req.body;
 
-    postDb.inster(post)
+    postDb.insert(post)
         .then(post => {
             res.status(201).json(post);
         })
@@ -105,17 +105,22 @@ router.delete('/:id', validateUserId, (req, res) => {
 // PUT user by id
 router.put('/:id', validateUserId, (req, res) => {
     const { id } = req.params;
-    const editedUser = req.body;
+    const { name } = req.body;
 
-    if (editedUser.name && editedUser.name !== "") {
-        userDb.update(id, editedUser)
-            .then(edited => {
-                res.status(200).json(editedUser);
-            })
-            .catch(err => {
-                res.status(500).json({ error: "User could not be updated." })
-            });
-    }
+    userDb.getById(id)
+        .then(user => {
+            if (user) {
+                userDb.update(id, { name })
+                    .then(updated => {
+                        res.status(200).json(updated);
+                    });
+            } else {
+                res.status(404).json({ error: "The user with the specified ID does not exist." });
+        }
+        })
+        .catch(err => {
+            res.status(500).json({ error: "User could not be updated." })
+        });
 });
 
 
