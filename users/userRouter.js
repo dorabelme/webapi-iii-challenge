@@ -53,19 +53,20 @@ router.get('/', (req, res) => {
 // GET user by id
 router.get('/:id', validateUserId, (req, res) => {
     const { id } = req.params;
-    userDb.getById(id)
-        .then(user => {
-            console.log(user);
-            if (user) {
-                res.status(200).json(user);
-            } else {
-                res.status(404).json({ error: "The user with the specified ID does not exist." });
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(404).json({ error: "There was an error retrieving the user from the database." });
-        });
+    res.status(200).json(req.user);
+    // userDb.getById(id)
+    //     .then(user => {
+    //         console.log(user);
+    //         if (user) {
+    //             res.status(200).json(user);
+    //         } else {
+    //             res.status(404).json({ error: "The user with the specified ID does not exist." });
+    //         }
+    //     })
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.status(404).json({ error: "There was an error retrieving the user from the database." });
+    //     });
 });
 
 // GET user by id posts
@@ -107,20 +108,25 @@ router.put('/:id', validateUserId, (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
 
-    userDb.getById(id)
-        .then(user => {
-            if (user) {
-                userDb.update(id, { name })
-                    .then(updated => {
-                        res.status(200).json(updated);
-                    });
-            } else {
-                res.status(404).json({ error: "The user with the specified ID does not exist." });
-        }
-        })
-        .catch(err => {
-            res.status(500).json({ error: "User could not be updated." })
+    userDb.update(id, { name })
+        .then(updated => {
+            res.status(200).json(updated);
         });
+
+    // userDb.getById(id)
+    //     .then(user => {
+    //         if (user) {
+    //             userDb.update(id, { name })
+    //                 .then(updated => {
+    //                     res.status(200).json(updated);
+    //                 });
+    //         } else {
+    //             res.status(404).json({ error: "The user with the specified ID does not exist." });
+    //     }
+    //     })
+    //     .catch(err => {
+    //         res.status(500).json({ error: "User could not be updated." })
+    //     });
 });
 
 
@@ -129,16 +135,26 @@ router.put('/:id', validateUserId, (req, res) => {
 function validateUserId(req, res, next) {
     const { id } = req.params;
 
-    userDb.get(id)
+    userDb.getById(id)
         .then(user => {
-            console.log(user);
-            if (!user) {
-                res.status(404).json({ error: "Invalid user id." })
-            } else {
+            if (user) {
                 req.user = user;
                 next();
-            }
+            } else {
+                res.status(404).json({error: "Invalid user id."})
+        }
         })
+        
+    // userDb.get(id)
+    //     .then(user => {
+    //         console.log(user);
+    //         if (!user) {
+    //             res.status(404).json({ error: "Invalid user id." })
+    //         } else {
+    //             req.user = user;
+    //             next();
+    //         }
+    //     })
         .catch(err => {
             console.log(err);
             res.status(500).json({ error: "User could not be retrieved." });
